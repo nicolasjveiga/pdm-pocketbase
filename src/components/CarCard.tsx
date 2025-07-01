@@ -1,4 +1,3 @@
-// src/components/CarCard.tsx
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import React from "react";
 import { Car } from "../types/Car";
@@ -19,9 +18,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: "#fff",
     marginBottom: 12,
-    // sombra Android
     elevation: 2,
-    // sombra iOS
     shadowColor: "#000",
     shadowOpacity: 0.1,
     shadowOffset: { width: 0, height: 1 },

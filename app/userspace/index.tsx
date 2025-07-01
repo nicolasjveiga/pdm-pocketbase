@@ -6,6 +6,7 @@ import { api } from "../../src/services/api";
 import { Car } from "../../src/types/Car";
 import { CarCard } from "../../src/components/CarCard";
 import { useRouter } from "expo-router";
+import { TouchableOpacity } from "react-native";
 
 export default function Home() {
   const router = useRouter();
@@ -13,7 +14,6 @@ export default function Home() {
   const [cars, setCars] = useState<Car[]>([]);
 
   useEffect(() => {
-    // exemplo com then-catch (na outra página usaremos async-await)
     api
       .get("/api/collections/cars/records", {
         headers: {
@@ -32,12 +32,24 @@ export default function Home() {
     <View style={styles.container}>
       <Text style={styles.title}>Cars API LIST</Text>
 
-      {/* botão para criar */}
-      <Link href="/userspace/create_car">
-        <Text style={styles.createLink}>+ Create a new Car</Text>
+      <Link href="/userspace/create_car" asChild>
+        <TouchableOpacity style={styles.button}>
+          <Text style={styles.buttonText}>+ Create a new Car</Text>
+        </TouchableOpacity>
       </Link>
 
-      {/* lista de carros */}
+      <Link href="/userspace/search" asChild>
+        <TouchableOpacity style={styles.button}>
+          <Text style={styles.buttonText}>Buscar por Marca</Text>
+        </TouchableOpacity>
+      </Link>
+
+      <Link href="/userspace/powerfull" asChild>
+        <TouchableOpacity style={styles.button}>
+          <Text style={styles.buttonText}>Ver Carros Potentes</Text>
+        </TouchableOpacity>
+      </Link>
+
       <FlatList
         data={cars}
         keyExtractor={(car: Car) => car.id}
@@ -65,13 +77,25 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     textAlign: "center",
   },
-  createLink: {
-    fontSize: 16,
-    color: "#007AFF",
-    marginBottom: 16,
-    textAlign: "center",
-  },
   listContent: {
     paddingBottom: 24,
+  },
+  button: {
+    backgroundColor: "#007AFF",
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    marginBottom: 12,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "600",
   },
 });

@@ -1,10 +1,10 @@
-// app/[id]/edit.tsx
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
-import { Alert, Button, TextInput, View, StyleSheet, Text } from "react-native";
+import { Alert, View, Text, StyleSheet } from "react-native";
 import { useTokenContext } from "../../../src/contexts/userContext";
 import { api } from "../../../src/services/api";
 import { Car } from "../../../src/types/Car";
+import { CarForm } from "../../../src/components/CarForm";
 
 export default function EditCar() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -12,28 +12,21 @@ export default function EditCar() {
   const { token } = useTokenContext();
 
   const [car, setCar] = useState<Car | null>(null);
-  const [brand, setBrand] = useState("");
-  const [model, setModel] = useState("");
-  const [hp, setHp] = useState("");
 
   useEffect(() => {
-    api.get<Car>(`/api/collections/cars/records/${id}`, {
-      headers: { Authorization: token },
-    })
-    .then(res => {
-      setCar(res.data);
-      setBrand(res.data.brand);
-      setModel(res.data.model);
-      setHp(String(res.data.hp));
-    })
-    .catch(err => Alert.alert("Erro ao carregar", err.message));
+    api
+      .get<Car>(`/api/collections/cars/records/${id}`, {
+        headers: { Authorization: token },
+      })
+      .then((res) => setCar(res.data))
+      .catch((err) => Alert.alert("Erro ao carregar", err.message));
   }, [id]);
 
-  const handleSave = async () => {
+  const handleSave = async (data: { brand: string; model: string; hp: number }) => {
     try {
       await api.patch<Car>(
         `/api/collections/cars/records/${id}`,
-        { brand, model, hp: parseInt(hp) },
+        data,
         { headers: { Authorization: token } }
       );
       Alert.alert("Atualizado!");
@@ -55,31 +48,44 @@ export default function EditCar() {
     }
   };
 
-  if (!car) return <Text>Carregando...</Text>;
+  if (!car) return <Text style={styles.loading}>Carregando...</Text>;
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Edit Car #{id}</Text>
-      <TextInput style={styles.input} value={brand} onChangeText={setBrand} placeholder="Brand" />
-      <TextInput style={styles.input} value={model} onChangeText={setModel} placeholder="Model" />
-      <TextInput
-        style={styles.input}
-        value={hp}
-        onChangeText={t => setHp(t.replace(/[^0-9]/g, ""))}
-        placeholder="HP"
-        keyboardType="number-pad"
+      <Text style={styles.title}>Editar o Carro: {car.brand} {car.model}</Text>
+      <CarForm
+        initialData={{
+          brand: car.brand,
+          model: car.model,
+          hp: car.hp,
+        }}
+        showDeleteButton={true}
+        submitLabel="Salvar Alterações"
+        onSubmit={handleSave}
+        onDelete={handleDelete}
       />
-      <Button title="Salvar" onPress={handleSave} />
-      <View style={{ height: 8 }} />
-      <Button title="Deletar" color="red" onPress={handleDelete} />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, backgroundColor: "#fff" },
-  title: { fontSize: 18, fontWeight: "bold", marginBottom: 16 },
-  input: {
-    borderWidth: 1, borderColor: "#ccc", padding: 8, marginBottom: 12, borderRadius: 4
+  container: {
+    flex: 1,
+    backgroundColor: "#f0f4f8",
+    padding: 24,
+    justifyContent: "center",
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: "bold",
+    marginBottom: 24,
+    textAlign: "center",
+    color: "#333",
+  },
+  loading: {
+    flex: 1,
+    textAlign: "center",
+    marginTop: 48,
+    fontSize: 16,
   },
 });
