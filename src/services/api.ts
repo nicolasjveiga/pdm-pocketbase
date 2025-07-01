@@ -1,7 +1,7 @@
 import { Platform } from "react-native";
 import axios from "axios";
 
-const LOCAL_IP = "192.168.0.109"; 
+const LOCAL_IP = ""; 
 
 const baseURL =
   Platform.OS === "web"
