@@ -1,71 +1,58 @@
 import { useRouter } from "expo-router";
-import { useState } from "react";
-import { Alert, Button, StyleSheet, Text, TextInput, View } from "react-native";
+import { Alert, StyleSheet, Text, View } from "react-native";
 import { useTokenContext } from "../../src/contexts/userContext";
 import { api } from "../../src/services/api";
 import { Car } from "../../src/types/Car";
+import { CarForm } from "../../src/components/CarForm";
 
 export default function CreateCar() {
   const router = useRouter();
   const { token } = useTokenContext();
 
-  const [brand, setBrand] = useState("");
-  const [model, setModel] = useState("");
-  const [hp, setHp] = useState("");
+  const handleCreate = async (data: { brand: string; model: string; hp: number }) => {
+    try {
+      const res = await api.post<Car>(
+        "/api/collections/cars/records",
+        data,
+        {
+          headers: {
+            Authorization: token,
+            "content-type": "application/json",
+          },
+        }
+      );
 
-  const handleCreate = async () => {
-    const data = {
-      model,
-      brand,
-      hp: parseInt(hp),
-    };
-
-    // na outra pagina fizemos com Promise.then, aqui com async/await
-    const createdCar = await api.post<Car>(
-      "/api/collections/cars/records",
-      data,
-      {
-        headers: {
-          Authorization: token,
-          "content-type": "application/json",
-        },
+      if (res.status === 200) {
+        Alert.alert("Criado com sucesso!", res.data.model);
+        router.replace("/userspace");
+      } else {
+        Alert.alert("Erro", "Erro ao criar carro");
       }
-    );
-
-    if (createdCar.status === 200) {
-      Alert.alert("Created!", createdCar.data.model);
-      router.replace("/userspace");
-    } else {
-      console.log(createdCar);
-      Alert.alert("Error!", "Error Creating Car!");
+    } catch (err: any) {
+      Alert.alert("Erro", err.message);
     }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Cars API CREATE</Text>
-
-      <TextInput value={brand} onChangeText={setBrand} placeholder="brand" />
-      <TextInput value={model} onChangeText={setModel} placeholder="model" />
-      <TextInput
-        value={hp}
-        onChangeText={(text) => setHp(text.replace(/[^0-9]/g, ""))}
-        placeholder="hp"
-        keyboardType="number-pad"
-      />
-
-      <Button title="Create Car" onPress={handleCreate} />
+      <Text style={styles.title}>Criar Novo Carro</Text>
+      <CarForm submitLabel="Cadastrar Carro" onSubmit={handleCreate} />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: 32,
     flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
+    backgroundColor: "#f0f4f8",
+    padding: 24,
     justifyContent: "center",
   },
-  title: { fontSize: 16, fontWeight: "bold", marginBottom: 16 },
+  title: {
+    fontSize: 22,
+    fontWeight: "bold",
+    marginBottom: 24,
+    textAlign: "center",
+    color: "#333",
+  },
 });
